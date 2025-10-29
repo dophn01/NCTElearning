@@ -71,29 +71,16 @@ export class VideosService {
         lessonId: createVideoDto.lessonId
       });
 
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = path.join(process.cwd(), 'uploads', 'videos');
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-
-      // Generate unique filename
-      const fileExtension = path.extname(file.originalname);
-      const fileName = `${Date.now()}-${Math.round(Math.random() * 1E9)}${fileExtension}`;
-      const filePath = path.join(uploadsDir, fileName);
-
-      console.log('Saving file to:', filePath);
-
-      // Save file
-      fs.writeFileSync(filePath, file.buffer);
-
-      // Calculate file size in MB
+      // File is already saved on disk by Multer diskStorage
+      // Multer provides `path` and `filename`
+      const savedFilePath = file.path as string; // absolute path
+      const savedFileName = file.filename as string;
       const fileSizeMb = file.size / (1024 * 1024);
 
       // Create video record
       const videoData: CreateVideoDto = {
         ...createVideoDto,
-        videoUrl: `/uploads/videos/${fileName}`,
+        videoUrl: `/uploads/videos/${savedFileName}`,
         fileSizeMb: Math.round(fileSizeMb * 100) / 100, // Round to 2 decimal places
       };
 

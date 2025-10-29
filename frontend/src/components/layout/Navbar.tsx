@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
@@ -17,10 +17,26 @@ import {
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const adminMenuCloseTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const openAdminMenu = () => {
+    if (adminMenuCloseTimeout.current) {
+      clearTimeout(adminMenuCloseTimeout.current);
+      adminMenuCloseTimeout.current = null;
+    }
+    setAdminMenuOpen(true);
+  };
+
+  const scheduleCloseAdminMenu = () => {
+    if (adminMenuCloseTimeout.current) {
+      clearTimeout(adminMenuCloseTimeout.current);
+    }
+    adminMenuCloseTimeout.current = setTimeout(() => setAdminMenuOpen(false), 220);
+  };
 
   const navigation = [
     { name: 'Trang chủ', href: '/' },
-    { name: 'Khóa học', href: '/courses' },
     { name: 'Video bài giảng', href: '/videos' },
     { name: 'Luyện tập', href: '/practice' },
   ];
@@ -56,32 +72,56 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
-                {/* Admin Dashboard Link */}
-                {user?.role === 'admin' && (
-                  <Link
-                    href="/admin/videos"
-                    className="flex items-center space-x-1 text-gray-600 hover:text-nc-gold transition-colors"
+                {/* Admin hover dropdown */}
+                {user?.role === 'admin' ? (
+                  <div
+                    className="relative"
+                    onMouseEnter={openAdminMenu}
+                    onMouseLeave={scheduleCloseAdminMenu}
                   >
-                    <CogIcon className="h-5 w-5" />
-                    <span className="text-sm">Quản lý</span>
-                  </Link>
+                    <div className="flex items-center space-x-2 cursor-pointer select-none">
+                      <UserCircleIcon className="h-6 w-6 text-gray-600" />
+                      <span className="text-sm text-gray-700">
+                        {user?.firstName} {user?.lastName}
+                      </span>
+                      <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full">
+                        Admin
+                      </span>
+                    </div>
+                    {adminMenuOpen && (
+                      <div
+                        className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-md shadow-lg py-1 z-50"
+                        onMouseEnter={openAdminMenu}
+                        onMouseLeave={scheduleCloseAdminMenu}
+                      >
+                        <Link
+                          href="/admin/videos"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          Quản lý Video
+                        </Link>
+                        <Link
+                          href="/admin/practice"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        >
+                          Quản lý Luyện tập
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <UserCircleIcon className="h-6 w-6 text-gray-600" />
+                    <span className="text-sm text-gray-700">
+                      {user?.firstName} {user?.lastName}
+                    </span>
+                    {user?.gradeLevel ? (
+                      <span className="text-xs bg-nc-gold text-white px-2 py-1 rounded-full">
+                        Lớp {user.gradeLevel}
+                      </span>
+                    ) : null}
+                  </div>
                 )}
-                
-                <div className="flex items-center space-x-2">
-                  <UserCircleIcon className="h-6 w-6 text-gray-600" />
-                  <span className="text-sm text-gray-700">
-                    {user?.firstName} {user?.lastName}
-                  </span>
-                  {user?.role === 'admin' ? (
-                    <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full">
-                      Admin
-                    </span>
-                  ) : user?.gradeLevel ? (
-                    <span className="text-xs bg-nc-gold text-white px-2 py-1 rounded-full">
-                      Lớp {user.gradeLevel}
-                    </span>
-                  ) : null}
-                </div>
                 <button
                   onClick={logout}
                   className="flex items-center space-x-1 text-gray-600 hover:text-nc-dark-orange transition-colors"
@@ -142,14 +182,24 @@ export function Navbar() {
                 <div className="pt-4 border-t border-gray-200">
                   {/* Admin Dashboard Link */}
                   {user?.role === 'admin' && (
-                    <Link
-                      href="/admin/videos"
-                      className="flex items-center space-x-2 text-gray-600 hover:text-nc-gold px-3 py-2 rounded-md text-base font-medium transition-colors"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <CogIcon className="h-5 w-5" />
-                      <span>Quản lý Video</span>
-                    </Link>
+                    <div className="space-y-1">
+                      <Link
+                        href="/admin/videos"
+                        className="flex items-center space-x-2 text-gray-600 hover:text-nc-gold px-3 py-2 rounded-md text-base font-medium transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <CogIcon className="h-5 w-5" />
+                        <span>Quản lý Video</span>
+                      </Link>
+                      <Link
+                        href="/admin/practice"
+                        className="flex items-center space-x-2 text-gray-600 hover:text-nc-gold px-3 py-2 rounded-md text-base font-medium transition-colors"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <CogIcon className="h-5 w-5" />
+                        <span>Quản lý Luyện tập</span>
+                      </Link>
+                    </div>
                   )}
                   
                   <div className="flex items-center space-x-2 px-3 py-2">

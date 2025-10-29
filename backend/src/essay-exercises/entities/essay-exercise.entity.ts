@@ -9,6 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Lesson } from '../../lessons/entities/lesson.entity';
+import { GradeLevel } from '../../users/entities/user.entity';
 import { EssaySubmission } from './essay-submission.entity';
 
 @Entity('essay_exercises')
@@ -18,6 +19,9 @@ export class EssayExercise {
 
   @Column()
   lessonId: string;
+
+  @Column({ name: 'grade_level', type: 'varchar', length: 10, nullable: true })
+  gradeLevel: GradeLevel | null;
 
   @Column()
   title: string;

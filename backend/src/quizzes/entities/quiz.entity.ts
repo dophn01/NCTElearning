@@ -9,6 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Lesson } from '../../lessons/entities/lesson.entity';
+import { GradeLevel } from '../../users/entities/user.entity';
+import { GradeLevel } from '../../users/entities/user.entity';
 import { QuizQuestion } from './quiz-question.entity';
 import { QuizAttempt } from './quiz-attempt.entity';
 
@@ -17,8 +19,14 @@ export class Quiz {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   lessonId: string;
+
+  @Column({ name: 'grade_level', type: 'varchar', length: 10, nullable: true })
+  gradeLevel: GradeLevel | null;
+
+  @Column({ name: 'grade_level', type: 'varchar', length: 10, nullable: true })
+  gradeLevel: GradeLevel | null;
 
   @Column()
   title: string;
@@ -42,7 +50,7 @@ export class Quiz {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Lesson, (lesson) => lesson.quizzes)
+  @ManyToOne(() => Lesson, (lesson) => lesson.quizzes, { nullable: true })
   @JoinColumn({ name: 'lessonId' })
   lesson: Lesson;
 

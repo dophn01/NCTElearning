@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, UseInterceptors, UploadedFile, BadRequestException, ForbiddenException, Req, Res, Header, HttpStatus } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VideosService, CreateVideoDto, UpdateVideoDto } from './videos.service';
 import { Video } from './entities/video.entity';
@@ -8,6 +8,9 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '../users/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @Controller('videos')
 export class VideosController {
@@ -27,7 +30,24 @@ export class VideosController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: (_req, _file, cb) => {
+        const uploadsDir = path.join(process.cwd(), 'uploads', 'videos');
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        cb(null, uploadsDir);
+      },
+      filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const name = `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+        cb(null, name);
+      },
+    }),
+    limits: {
+      // allow large lesson videos (e.g., up to ~4GB)
+      fileSize: 4 * 1024 * 1024 * 1024,
+    },
+  }))
   async create(
     @UploadedFile() file: any,
     @Body() createVideoDto: CreateVideoDto
@@ -53,11 +73,9 @@ export class VideosController {
         throw new BadRequestException('File must be a video');
       }
 
-      // Validate file size (100MB max)
-      const maxSize = 100 * 1024 * 1024; // 100MB
-      if (file.size > maxSize) {
-        console.error('File too large:', file.size);
-        throw new BadRequestException('File size must be less than 100MB');
+      // Basic safety check (actual limit handled by Multer limits above)
+      if (!Number.isFinite(file.size) || file.size <= 0) {
+        throw new BadRequestException('Tệp tin không hợp lệ');
       }
 
       // Validate required fields
@@ -82,6 +100,49 @@ export class VideosController {
       
       // Re-throw the error to be handled by the global exception filter
       throw error;
+    }
+  }
+
+  // Byte-range streaming endpoint for reliable playback of large files
+  @Get('stream/:id')
+  @UseGuards(JwtAuthGuard)
+  async stream(@Param('id') id: string, @Res() res, @Req() req) {
+    const video = await this.videosService.findById(id);
+    if (!video || !video.videoUrl) {
+      res.status(HttpStatus.NOT_FOUND).send('Video not found');
+      return;
+    }
+
+    const absolutePath = path.join(process.cwd(), video.videoUrl.startsWith('/') ? video.videoUrl.substring(1) : video.videoUrl);
+    if (!fs.existsSync(absolutePath)) {
+      res.status(HttpStatus.NOT_FOUND).send('File not found');
+      return;
+    }
+
+    const stat = fs.statSync(absolutePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = end - start + 1;
+      const file = fs.createReadStream(absolutePath, { start, end });
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize,
+        'Content-Type': 'video/mp4',
+      });
+      file.pipe(res);
+    } else {
+      res.writeHead(200, {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+        'Accept-Ranges': 'bytes',
+      });
+      fs.createReadStream(absolutePath).pipe(res);
     }
   }
 

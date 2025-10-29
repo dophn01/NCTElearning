@@ -56,13 +56,6 @@ export default function Home() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/courses"
-                className="bg-white text-nc-dark-orange hover:bg-gray-50 font-semibold py-3 px-8 rounded-lg text-lg transition-colors inline-flex items-center justify-center"
-              >
-                <BookOpenIcon className="h-5 w-5 mr-2" />
-                Bắt đầu học ngay
-              </Link>
-              <Link
                 href="/videos"
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-nc-dark-orange font-semibold py-3 px-8 rounded-lg text-lg transition-colors inline-flex items-center justify-center"
               >
@@ -97,7 +90,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-nc-dark-orange mb-4">
-              Tại sao chọn NC Telearning?
+              Tại sao chọn NCTelearning?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Chúng tôi mang đến phương pháp học văn học hiện đại, 
@@ -121,45 +114,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Grade Levels Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-nc-dark-orange mb-4">
-              Khóa học theo từng lớp
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Nội dung được thiết kế phù hợp với chương trình học của từng lớp
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { grade: '10', title: 'Lớp 10', description: 'Khóa học văn học được thiết kế đặc biệt cho học sinh lớp 10, bao gồm các tác phẩm và chủ đề quan trọng trong chương trình học.' },
-              { grade: '11', title: 'Lớp 11', description: 'Khóa học văn học được thiết kế đặc biệt cho học sinh lớp 11, bao gồm các tác phẩm và chủ đề quan trọng trong chương trình học.' },
-              { grade: '12', title: 'Lớp 12', description: 'Khóa học văn học được thiết kế đặc biệt cho học sinh lớp 12, bao gồm các tác phẩm và chủ đề quan trọng trong chương trình học.' }
-            ].map((item) => (
-              <div key={item.grade} className="card text-center hover:shadow-lg transition-shadow">
-                <div className="bg-gradient-to-br from-nc-gold to-nc-orange text-white rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6 text-3xl font-bold shadow-lg">
-                  {item.grade}
-                </div>
-                <h3 className="text-2xl font-semibold text-nc-dark-orange mb-4">
-                  {item.title}
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  {item.description}
-                </p>
-                <Link
-                  href={`/courses/grade/${item.grade}`}
-                  className="btn-primary inline-block"
-                >
-                  Xem khóa học lớp {item.grade}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-nc-gold to-nc-orange">
@@ -179,10 +134,10 @@ export default function Home() {
               Đăng ký miễn phí
             </Link>
             <Link
-              href="/courses"
+              href="/videos"
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-nc-dark-orange font-semibold py-3 px-8 rounded-lg text-lg transition-colors"
             >
-              Khám phá khóa học
+              Xem danh sách video
             </Link>
           </div>
         </div>

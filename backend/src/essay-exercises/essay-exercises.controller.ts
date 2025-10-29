@@ -1,6 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { EssayExercisesService, CreateEssayExerciseDto, CreateEssaySubmissionDto } from './essay-exercises.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('essay-exercises')
 export class EssayExercisesController {
@@ -19,11 +22,14 @@ export class EssayExercisesController {
   }
 
   @Get()
-  findAll(@Query('lessonId') lessonId?: string) {
+  findAll(
+    @Query('lessonId') lessonId?: string,
+    @Query('gradeLevel') gradeLevel?: '10' | '11' | '12'
+  ) {
     if (lessonId) {
       return this.essayExercisesService.findByLesson(lessonId);
     }
-    return this.essayExercisesService.findAllExercises();
+    return this.essayExercisesService.findAllExercises(gradeLevel);
   }
 
   @Get('submissions')
@@ -41,5 +47,12 @@ export class EssayExercisesController {
   @UseGuards(JwtAuthGuard)
   gradeSubmission(@Param('id') id: string, @Body() body: { grade: number; feedback?: string }) {
     return this.essayExercisesService.gradeSubmission(id, body.grade, body.feedback);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.essayExercisesService.deleteExercise(id);
   }
 }

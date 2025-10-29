@@ -45,17 +45,15 @@ interface Course {
 }
 
 export default function AdminVideosPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [videos, setVideos] = useState<Video[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<string>('');
-  const [selectedLesson, setSelectedLesson] = useState<string>('');
   const [gradeFilter, setGradeFilter] = useState<string>('');
 
   useEffect(() => {
+    if (loading) return; // wait for auth resolution
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -67,14 +65,13 @@ export default function AdminVideosPage() {
     }
 
     fetchVideos();
-    fetchCourses();
-  }, [isAuthenticated, user, router]);
+  }, [loading, isAuthenticated, user, router]);
 
   const fetchVideos = async () => {
     try {
       const response = await fetch('http://localhost:3001/api/videos', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
         }
       });
       const data = await response.json();
@@ -84,28 +81,7 @@ export default function AdminVideosPage() {
     }
   };
 
-  const fetchCourses = async () => {
-    try {
-      const response = await fetch('http://localhost:3001/api/courses/all', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-      
-      if (!response.ok) {
-        console.error('Failed to fetch courses:', response.status, response.statusText);
-        return;
-      }
-      
-      const data = await response.json();
-      console.log('Fetched courses:', data); // Debug log
-      setCourses(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Error fetching courses:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => { setDataLoading(false); }, []);
 
   const formatDuration = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -127,7 +103,7 @@ export default function AdminVideosPage() {
       const response = await fetch(`http://localhost:3001/api/videos/${videoId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
         }
       });
 
@@ -139,7 +115,7 @@ export default function AdminVideosPage() {
     }
   };
 
-  if (loading) {
+  if (dataLoading) {
     return (
       <div className="min-h-screen bg-nc-cream flex items-center justify-center">
         <div className="text-center">
@@ -295,7 +271,6 @@ export default function AdminVideosPage() {
       {/* Upload Modal */}
       {showUploadModal && (
         <VideoUploadModal
-          courses={courses}
           onClose={() => setShowUploadModal(false)}
           onUploadSuccess={() => {
             setShowUploadModal(false);
@@ -309,12 +284,11 @@ export default function AdminVideosPage() {
 
 // Video Upload Modal Component
 interface VideoUploadModalProps {
-  courses: Course[];
   onClose: () => void;
   onUploadSuccess: () => void;
 }
 
-function VideoUploadModal({ courses, onClose, onUploadSuccess }: VideoUploadModalProps) {
+function VideoUploadModal({ onClose, onUploadSuccess }: VideoUploadModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -372,7 +346,7 @@ function VideoUploadModal({ courses, onClose, onUploadSuccess }: VideoUploadModa
       const response = await fetch('http://localhost:3001/api/videos', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+          'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
         },
         body: uploadData
       });

@@ -33,11 +33,7 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2">
-              <li>
-                <Link href="/courses" className="text-gray-200 hover:text-nc-gold transition-colors">
-                  Khóa học
-                </Link>
-              </li>
+              
               <li>
                 <Link href="/videos" className="text-gray-200 hover:text-nc-gold transition-colors">
                   Video bài giảng
@@ -91,7 +87,7 @@ export function Footer() {
               Coppyright © 2025 By Nguyen Cuong.
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
-              <Link href="/facebook" className="text-gray-200 hover:text-nc-gold transition-colors">
+              <Link href="/facebook" className="text-gray-200 hover:text-nc-gold transition-colors">  
                 Facebook
               </Link>
               <Link href="/youtube" className="text-gray-200 hover:text-nc-gold transition-colors">

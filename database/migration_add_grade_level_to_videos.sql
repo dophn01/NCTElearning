@@ -25,3 +25,4 @@ ALTER TABLE videos ALTER COLUMN grade_level SET NOT NULL;
 
 -- Add an index for better performance when filtering by grade level
 CREATE INDEX idx_videos_grade_level ON videos(grade_level);
+

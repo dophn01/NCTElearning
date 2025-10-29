@@ -7,6 +7,7 @@ import { QuizQuestion } from './entities/quiz-question.entity';
 import { QuizQuestionOption } from './entities/quiz-question-option.entity';
 import { QuizAttempt } from './entities/quiz-attempt.entity';
 import { QuizAttemptAnswer } from './entities/quiz-attempt-answer.entity';
+import { Lesson } from '../lessons/entities/lesson.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { QuizAttemptAnswer } from './entities/quiz-attempt-answer.entity';
       QuizQuestionOption,
       QuizAttempt,
       QuizAttemptAnswer,
+      Lesson,
     ]),
   ],
   controllers: [QuizzesController],

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/providers/AuthProvider';
 import Link from 'next/link';
 import { 
   AcademicCapIcon, 
@@ -18,10 +19,11 @@ interface Quiz {
   description: string;
   timeLimitMinutes?: number;
   maxAttempts: number;
-  lesson: {
+  gradeLevel?: '10' | '11' | '12';
+  lesson?: {
     id: string;
     title: string;
-    course: {
+    course?: {
       id: string;
       title: string;
       gradeLevel: '10' | '11' | '12';
@@ -37,6 +39,7 @@ interface EssayExercise {
   wordCountMin: number;
   wordCountMax: number;
   timeLimitMinutes: number;
+  gradeLevel?: '10' | '11' | '12';
   lesson: {
     id: string;
     title: string;
@@ -50,12 +53,22 @@ interface EssayExercise {
 }
 
 export default function PracticePage() {
+  const { user } = useAuth();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [essayExercises, setEssayExercises] = useState<EssayExercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'quizzes' | 'essays'>('quizzes');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGrade, setSelectedGrade] = useState<'10' | '11' | '12' | 'all'>('all');
+
+  // Default student view to their grade; admins see all
+  useEffect(() => {
+    if (user?.role === 'user' && user.gradeLevel) {
+      setSelectedGrade(user.gradeLevel);
+    } else if (user?.role === 'admin') {
+      setSelectedGrade('all');
+    }
+  }, [user]);
 
   useEffect(() => {
     fetchPracticeData();
@@ -170,15 +183,17 @@ export default function PracticePage() {
 
   const filteredQuizzes = quizzes.filter(quiz => {
     const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         quiz.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGrade = selectedGrade === 'all' || quiz.lesson.course.gradeLevel === selectedGrade;
+                         (quiz.description || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const grade = quiz.gradeLevel || quiz.lesson?.course?.gradeLevel;
+    const matchesGrade = selectedGrade === 'all' || grade === selectedGrade;
     return matchesSearch && matchesGrade;
   });
 
   const filteredEssays = essayExercises.filter(essay => {
     const matchesSearch = essay.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          essay.prompt.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGrade = selectedGrade === 'all' || essay.lesson.course.gradeLevel === selectedGrade;
+    const grade = essay.gradeLevel || essay.lesson.course.gradeLevel;
+    const matchesGrade = selectedGrade === 'all' || grade === selectedGrade;
     return matchesSearch && matchesGrade;
   });
 
@@ -282,9 +297,11 @@ export default function PracticePage() {
                     {/* Quiz Info */}
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="bg-nc-gold text-white text-xs px-2 py-1 rounded-full">
-                          Lớp {quiz.lesson.course.gradeLevel}
-                        </span>
+                        {(quiz.gradeLevel || quiz.lesson?.course?.gradeLevel) && (
+                          <span className="bg-nc-gold text-white text-xs px-2 py-1 rounded-full">
+                            Lớp {quiz.gradeLevel || quiz.lesson?.course?.gradeLevel}
+                          </span>
+                        )}
                         <span className="text-sm text-gray-500">
                           {quiz.maxAttempts} lần thử
                         </span>
@@ -298,10 +315,12 @@ export default function PracticePage() {
                         {quiz.description}
                       </p>
 
-                      <div className="flex items-center text-sm text-gray-500 mb-2">
-                        <BookOpenIcon className="h-4 w-4 mr-1" />
-                        <span className="truncate">{quiz.lesson.course.title}</span>
-                      </div>
+                      {quiz.lesson?.course?.title && (
+                        <div className="flex items-center text-sm text-gray-500 mb-2">
+                          <BookOpenIcon className="h-4 w-4 mr-1" />
+                          <span className="truncate">{quiz.lesson.course.title}</span>
+                        </div>
+                      )}
 
                       {quiz.timeLimitMinutes && (
                         <div className="flex items-center text-sm text-gray-500">
@@ -336,9 +355,7 @@ export default function PracticePage() {
                     {/* Essay Info */}
                     <div className="mb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="bg-nc-orange text-white text-xs px-2 py-1 rounded-full">
-                          Lớp {essay.lesson.course.gradeLevel}
-                        </span>
+                        <span className="bg-nc-orange text-white text-xs px-2 py-1 rounded-full">Lớp {essay.gradeLevel || essay.lesson.course.gradeLevel}</span>
                         <span className="text-sm text-gray-500">
                           {essay.wordCountMin}-{essay.wordCountMax} từ
                         </span>

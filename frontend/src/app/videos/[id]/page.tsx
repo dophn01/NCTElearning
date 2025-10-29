@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
@@ -34,30 +34,38 @@ interface Video {
 }
 
 export default function VideoDetailPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const params = useParams();
   const videoId = params.id as string;
   
   const [video, setVideo] = useState<Video | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isTheater, setIsTheater] = useState(false);
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Build video source once data is available (no hooks inside JSX)
+  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+  const videoSrc = video?.videoUrl ? `${apiBase}${video.videoUrl}` : undefined;
 
   useEffect(() => {
+    if (authLoading) return; // Wait until auth state is resolved
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
     }
 
     fetchVideo();
-  }, [isAuthenticated, user, router, videoId]);
+  }, [authLoading, isAuthenticated, user, router, videoId]);
 
   const fetchVideo = async () => {
     try {
-      setLoading(true);
+      setDataLoading(true);
       setError('');
       
-      const token = localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('accessToken');
       if (!token) {
         throw new Error('Không có token xác thực');
       }
@@ -88,7 +96,7 @@ export default function VideoDetailPage() {
       console.error('Error fetching video:', error);
       setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải video');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
@@ -105,7 +113,7 @@ export default function VideoDetailPage() {
     return `${mb.toFixed(1)} MB`;
   };
 
-  if (loading) {
+  if (dataLoading) {
     return (
       <div className="min-h-screen bg-nc-cream flex items-center justify-center">
         <div className="text-center">
@@ -175,7 +183,7 @@ export default function VideoDetailPage() {
 
   return (
     <div className="min-h-screen bg-nc-cream py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={isTheater ? 'max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-6' : 'max-w-6xl mx-auto px-4 sm:px-6 lg:px-8'}>
         {/* Back Button */}
         <button
           onClick={() => router.back()}
@@ -185,19 +193,46 @@ export default function VideoDetailPage() {
           Quay lại
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={isTheater ? 'grid grid-cols-1 lg:grid-cols-4 gap-8' : 'grid grid-cols-1 lg:grid-cols-3 gap-8'}>
           {/* Video Player */}
-          <div className="lg:col-span-2">
+          <div className={isTheater ? 'lg:col-span-3' : 'lg:col-span-2'}>
             <div className="card">
-              <div className="aspect-video bg-gradient-to-br from-nc-gold via-nc-orange to-nc-dark-orange rounded-lg mb-4 flex items-center justify-center relative overflow-hidden">
-                {/* Blur background effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-black/20"></div>
-                <div className="relative z-10 text-center text-white">
-                  <PlayIcon className="h-16 w-16 mx-auto mb-4 drop-shadow-lg" />
-                  <p className="text-lg font-medium drop-shadow-md">Video Player</p>
-                  <p className="text-sm text-white/80 drop-shadow-sm">
-                    URL: {video.videoUrl}
-                  </p>
+              <div ref={playerContainerRef} className="rounded-lg mb-4 relative overflow-hidden bg-black">
+                <video
+                  ref={videoRef}
+                  className="w-full h-auto aspect-video bg-black"
+                  src={videoSrc}
+                  controls
+                  controlsList="nodownload"
+                  preload="metadata"
+                  onError={() => {
+                    // Helpful debug in console if file path is wrong or 404
+                    console.error('Video failed to load:', videoSrc);
+                  }}
+                />
+                <div className="absolute top-2 right-2 flex gap-2 z-10">
+                  <button
+                    onClick={() => setIsTheater((v) => !v)}
+                    className="px-3 py-1 rounded-md bg-white/90 hover:bg-white text-sm text-gray-800 shadow"
+                    title={isTheater ? 'Thoát chế độ rạp' : 'Chế độ rạp'}
+                  >
+                    {isTheater ? 'Thoát rạp' : 'Rạp'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      const el = playerContainerRef.current;
+                      if (!el) return;
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                      } else {
+                        el.requestFullscreen?.();
+                      }
+                    }}
+                    className="px-3 py-1 rounded-md bg-white/90 hover:bg-white text-sm text-gray-800 shadow"
+                    title="Toàn màn hình"
+                  >
+                    Fullscreen
+                  </button>
                 </div>
               </div>
               
@@ -274,7 +309,7 @@ export default function VideoDetailPage() {
                   {user?.firstName} {user?.lastName} ({user?.role === 'admin' ? 'Giáo viên' : 'Học sinh'})
                 </p>
                 
-                {user?.gradeLevel && (
+                {user?.role !== 'admin' && user?.gradeLevel && (
                   <>
                     <div className="flex items-center text-sm">
                       <span className="font-medium">Lớp của bạn:</span>

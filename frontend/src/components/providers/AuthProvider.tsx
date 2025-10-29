@@ -37,11 +37,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Configure axios defaults
+  // Configure axios defaults and migrate any existing localStorage token to sessionStorage
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const localToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+    const token = sessionToken || localToken;
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      // If token was in localStorage from an older version, move it to sessionStorage
+      if (!sessionToken) {
+        try {
+          sessionStorage.setItem('accessToken', token);
+          localStorage.removeItem('accessToken');
+        } catch {}
+      }
     }
   }, []);
 
@@ -54,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { accessToken, user: userData } = response.data;
       
-      localStorage.setItem('accessToken', accessToken);
+      sessionStorage.setItem('accessToken', accessToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       setUser(userData);
     } catch (error) {
@@ -69,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       const { accessToken, user: newUser } = response.data;
       
-      localStorage.setItem('accessToken', accessToken);
+      sessionStorage.setItem('accessToken', accessToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       setUser(newUser);
     } catch (error) {
@@ -79,14 +88,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessToken');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('accessToken');
       if (!token) {
         setLoading(false);
         return;

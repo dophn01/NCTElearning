@@ -69,6 +69,7 @@ CREATE TABLE videos (
 CREATE TABLE quizzes (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
+    grade_level grade_level,
     title VARCHAR(255) NOT NULL,
     description TEXT,
     time_limit_minutes INTEGER,
@@ -129,6 +130,7 @@ CREATE TABLE quiz_attempt_answers (
 CREATE TABLE essay_exercises (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     lesson_id UUID REFERENCES lessons(id) ON DELETE CASCADE,
+    grade_level grade_level,
     title VARCHAR(255) NOT NULL,
     prompt TEXT NOT NULL,
     word_count_min INTEGER DEFAULT 200,
@@ -171,7 +173,9 @@ CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_courses_grade_level ON courses(grade_level);
 CREATE INDEX idx_lessons_course_id ON lessons(course_id);
 CREATE INDEX idx_videos_lesson_id ON videos(lesson_id);
+CREATE INDEX idx_quizzes_grade_level ON quizzes(grade_level);
 CREATE INDEX idx_quizzes_lesson_id ON quizzes(lesson_id);
+CREATE INDEX idx_essay_exercises_grade_level ON essay_exercises(grade_level);
 CREATE INDEX idx_quiz_questions_quiz_id ON quiz_questions(quiz_id);
 CREATE INDEX idx_quiz_attempts_user_id ON quiz_attempts(user_id);
 CREATE INDEX idx_quiz_attempts_quiz_id ON quiz_attempts(quiz_id);

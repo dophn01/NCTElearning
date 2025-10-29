@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EssayExercise } from './entities/essay-exercise.entity';
 import { EssaySubmission } from './entities/essay-submission.entity';
+import { GradeLevel } from '../users/entities/user.entity';
 
 export interface CreateEssayExerciseDto {
   lessonId: string;
@@ -12,6 +13,7 @@ export interface CreateEssayExerciseDto {
   wordCountMax?: number;
   timeLimitMinutes?: number;
   isPublished?: boolean;
+  gradeLevel?: GradeLevel;
 }
 
 export interface CreateEssaySubmissionDto {
@@ -41,11 +43,17 @@ export class EssayExercisesService {
     return this.submissionsRepository.save(submission);
   }
 
-  async findAllExercises(): Promise<EssayExercise[]> {
-    return this.exercisesRepository.find({
-      relations: ['lesson'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAllExercises(gradeLevel?: '10' | '11' | '12'): Promise<EssayExercise[]> {
+    const qb = this.exercisesRepository.createQueryBuilder('exercise')
+      .leftJoinAndSelect('exercise.lesson', 'lesson')
+      .leftJoinAndSelect('lesson.course', 'course')
+      .orderBy('exercise.createdAt', 'DESC');
+
+    if (gradeLevel) {
+      qb.andWhere('(exercise.gradeLevel = :gradeLevel OR course.gradeLevel = :gradeLevel)', { gradeLevel });
+    }
+
+    return qb.getMany();
   }
 
   async findExerciseById(id: string): Promise<EssayExercise | null> {
@@ -85,5 +93,9 @@ export class EssayExercisesService {
     submission.gradedAt = new Date();
 
     return this.submissionsRepository.save(submission);
+  }
+
+  async deleteExercise(id: string): Promise<void> {
+    await this.exercisesRepository.delete(id);
   }
 }

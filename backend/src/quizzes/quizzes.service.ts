@@ -1,19 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { Quiz } from './entities/quiz.entity';
 import { QuizQuestion } from './entities/quiz-question.entity';
 import { QuizQuestionOption } from './entities/quiz-question-option.entity';
 import { QuizAttempt } from './entities/quiz-attempt.entity';
 import { QuizAttemptAnswer } from './entities/quiz-attempt-answer.entity';
+import { Lesson } from '../lessons/entities/lesson.entity';
+import { GradeLevel } from '../users/entities/user.entity';
 
 export interface CreateQuizDto {
-  lessonId: string;
+  lessonId?: string;
   title: string;
   description?: string;
   timeLimitMinutes?: number;
   maxAttempts?: number;
   isPublished?: boolean;
+  gradeLevel?: GradeLevel;
 }
 
 export interface CreateQuizQuestionDto {
@@ -44,10 +47,23 @@ export class QuizzesService {
     private attemptsRepository: Repository<QuizAttempt>,
     @InjectRepository(QuizAttemptAnswer)
     private answersRepository: Repository<QuizAttemptAnswer>,
+    @InjectRepository(Lesson)
+    private lessonsRepository: Repository<Lesson>,
   ) {}
 
   async createQuiz(createQuizDto: CreateQuizDto): Promise<Quiz> {
-    const quiz = this.quizzesRepository.create(createQuizDto);
+    // If lessonId provided, ensure it exists; otherwise allow quiz without lesson
+    if (createQuizDto.lessonId) {
+      const lesson = await this.lessonsRepository.findOne({ where: { id: createQuizDto.lessonId }, relations: ['course'] });
+      if (!lesson) {
+        throw new BadRequestException('Lesson không tồn tại');
+      }
+    }
+
+    const quiz = this.quizzesRepository.create({
+      ...createQuizDto,
+      maxAttempts: createQuizDto.maxAttempts ?? 3,
+    });
     return this.quizzesRepository.save(quiz);
   }
 
@@ -64,17 +80,25 @@ export class QuizzesService {
     return this.optionsRepository.save(option);
   }
 
-  async findAllQuizzes(): Promise<Quiz[]> {
-    return this.quizzesRepository.find({
-      relations: ['lesson', 'questions', 'questions.options'],
-      order: { createdAt: 'DESC' },
-    });
+  async findAllQuizzes(gradeLevel?: '10' | '11' | '12'): Promise<Quiz[]> {
+    const qb = this.quizzesRepository.createQueryBuilder('quiz')
+      .leftJoinAndSelect('quiz.lesson', 'lesson')
+      .leftJoinAndSelect('lesson.course', 'course')
+      .leftJoinAndSelect('quiz.questions', 'questions')
+      .leftJoinAndSelect('questions.options', 'options')
+      .orderBy('quiz.createdAt', 'DESC');
+
+    if (gradeLevel) {
+      qb.andWhere('(quiz.gradeLevel = :gradeLevel OR course.gradeLevel = :gradeLevel)', { gradeLevel });
+    }
+
+    return qb.getMany();
   }
 
   async findQuizById(id: string): Promise<Quiz | null> {
     return this.quizzesRepository.findOne({
       where: { id },
-      relations: ['lesson', 'questions', 'questions.options'],
+      relations: ['lesson', 'lesson.course', 'questions', 'questions.options'],
     });
   }
 
@@ -128,5 +152,52 @@ export class QuizzesService {
     attempt.totalPoints = attempt.quiz.questions.reduce((sum, q) => sum + q.points, 0);
 
     return this.attemptsRepository.save(attempt);
+  }
+
+  async listAttemptsForQuiz(quizId: string, status?: 'in_progress' | 'completed'): Promise<QuizAttempt[]> {
+    const where: any = { quizId };
+    if (status === 'in_progress') {
+      where.completedAt = null;
+    } else if (status === 'completed') {
+      where.completedAt = Not(null as unknown as Date);
+    }
+    return this.attemptsRepository.find({
+      where,
+      relations: ['user'],
+      order: { startedAt: 'DESC' },
+    });
+  }
+
+  async getAttemptWithAnswers(attemptId: string): Promise<QuizAttempt | null> {
+    return this.attemptsRepository.findOne({
+      where: { id: attemptId },
+      relations: [
+        'answers',
+        'answers.question',
+        'answers.selectedOption',
+        'quiz',
+        'quiz.questions',
+        'quiz.questions.options',
+        'user',
+      ],
+    });
+  }
+
+  async gradeAnswer(answerId: string, pointsEarned?: number, isCorrect?: boolean): Promise<QuizAttemptAnswer> {
+    const answer = await this.answersRepository.findOne({ where: { id: answerId } });
+    if (!answer) {
+      throw new NotFoundException('Không tìm thấy câu trả lời');
+    }
+    if (typeof pointsEarned === 'number') {
+      answer.pointsEarned = pointsEarned;
+    }
+    if (typeof isCorrect === 'boolean') {
+      answer.isCorrect = isCorrect;
+    }
+    return this.answersRepository.save(answer);
+  }
+
+  async deleteQuiz(id: string): Promise<void> {
+    await this.quizzesRepository.delete(id);
   }
 }

@@ -35,29 +35,30 @@ interface Video {
 }
 
 export default function VideosPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, loading: authLoading } = useAuth();
   const router = useRouter();
   const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGrade, setSelectedGrade] = useState<'10' | '11' | '12' | 'all'>('all');
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (authLoading) return; // wait until auth ready
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
     }
 
     fetchVideos();
-  }, [isAuthenticated, user, router]);
+  }, [authLoading, isAuthenticated, user, router]);
 
   const fetchVideos = async () => {
     try {
-      setLoading(true);
+      setDataLoading(true);
       setError('');
       
-      const token = localStorage.getItem('accessToken');
+      const token = sessionStorage.getItem('accessToken');
       if (!token) {
         throw new Error('Không có token xác thực');
       }
@@ -83,7 +84,7 @@ export default function VideosPage() {
       console.error('Error fetching videos:', error);
       setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi tải video');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
@@ -117,11 +118,18 @@ export default function VideosPage() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-4">
             Học văn học qua các video bài giảng chất lượng cao từ giáo viên giàu kinh nghiệm
           </p>
-          {user?.gradeLevel && (
-            <div className="inline-flex items-center bg-nc-gold text-white px-4 py-2 rounded-full text-sm font-medium">
+          {user?.role === 'admin' ? (
+            <div className="inline-flex items-center bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium">
               <UserIcon className="h-4 w-4 mr-2" />
-              Lớp {user.gradeLevel} - {user.firstName} {user.lastName}
+              Admin - {user.firstName} {user.lastName}
             </div>
+          ) : (
+            user?.gradeLevel && (
+              <div className="inline-flex items-center bg-nc-gold text-white px-4 py-2 rounded-full text-sm font-medium">
+                <UserIcon className="h-4 w-4 mr-2" />
+                Lớp {user.gradeLevel} - {user.firstName} {user.lastName}
+              </div>
+            )
           )}
         </div>
 
@@ -138,13 +146,14 @@ export default function VideosPage() {
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             {/* Search Bar */}
             <div className="relative flex-1 max-w-md">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="pointer-events-none absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
                 placeholder="Tìm kiếm video..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input pl-10"
+                className="input pl-14"
+                style={{ paddingLeft: '3.25rem' }}
               />
             </div>
 
@@ -168,7 +177,7 @@ export default function VideosPage() {
         </div>
 
         {/* Videos Grid */}
-        {loading ? (
+        {dataLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div key={i} className="card animate-pulse">
@@ -231,7 +240,7 @@ export default function VideosPage() {
           </div>
         )}
 
-        {!loading && filteredVideos.length === 0 && (
+        {!dataLoading && filteredVideos.length === 0 && (
           <div className="text-center py-12">
             <PlayIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-500 mb-2">

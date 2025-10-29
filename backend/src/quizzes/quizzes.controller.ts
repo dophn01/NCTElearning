@@ -1,6 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { QuizzesService, CreateQuizDto, CreateQuizQuestionDto, CreateQuizOptionDto } from './quizzes.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/entities/user.entity';
 
 @Controller('quizzes')
 export class QuizzesController {
@@ -25,11 +28,14 @@ export class QuizzesController {
   }
 
   @Get()
-  findAll(@Query('lessonId') lessonId?: string) {
+  findAll(
+    @Query('lessonId') lessonId?: string,
+    @Query('gradeLevel') gradeLevel?: '10' | '11' | '12'
+  ) {
     if (lessonId) {
       return this.quizzesService.findByLesson(lessonId);
     }
-    return this.quizzesService.findAllQuizzes();
+    return this.quizzesService.findAllQuizzes(gradeLevel);
   }
 
   @Get(':id')
@@ -53,5 +59,40 @@ export class QuizzesController {
   @UseGuards(JwtAuthGuard)
   completeAttempt(@Param('attemptId') attemptId: string) {
     return this.quizzesService.completeAttempt(attemptId);
+  }
+
+  // Admin endpoints for managing attempts
+  @Get(':id/attempts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  listAttempts(
+    @Param('id') quizId: string,
+    @Query('status') status?: 'in_progress' | 'completed'
+  ) {
+    return this.quizzesService.listAttemptsForQuiz(quizId, status);
+  }
+
+  @Get('attempts/:attemptId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  getAttempt(@Param('attemptId') attemptId: string) {
+    return this.quizzesService.getAttemptWithAnswers(attemptId);
+  }
+
+  @Patch('attempts/answers/:answerId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  gradeAnswer(
+    @Param('answerId') answerId: string,
+    @Body() body: { pointsEarned?: number; isCorrect?: boolean }
+  ) {
+    return this.quizzesService.gradeAnswer(answerId, body.pointsEarned, body.isCorrect);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.quizzesService.deleteQuiz(id);
   }
 }
