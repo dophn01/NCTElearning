@@ -26,7 +26,7 @@ export default function NewExercisePage() {
   const [error, setError] = useState<string | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
