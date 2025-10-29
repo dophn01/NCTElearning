@@ -111,3 +111,7 @@ uploads/
 tmp/
 temp/
 
+# Secrets accidentally added
+public
+public.pub
+

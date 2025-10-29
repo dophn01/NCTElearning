@@ -21,6 +21,11 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
 }
+interface AuthResponse {
+  accessToken: string;
+  user: User;
+}
+
 
 interface RegisterData {
   email: string;
@@ -56,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', {
+      const response = await axios.post<AuthResponse>('http://localhost:3001/api/auth/login', {
         email,
         password,
       });
@@ -74,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/register', userData);
+      const response = await axios.post<AuthResponse>('http://localhost:3001/api/auth/register', userData);
       
       const { accessToken, user: newUser } = response.data;
       
@@ -102,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const response = await axios.get('http://localhost:3001/api/auth/profile');
+      const response = await axios.get<User>('http://localhost:3001/api/auth/profile');
       setUser(response.data);
     } catch (error) {
       console.error('Auth check error:', error);
