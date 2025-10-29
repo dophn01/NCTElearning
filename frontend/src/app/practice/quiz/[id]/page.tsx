@@ -20,7 +20,7 @@ export default function QuizTakePage() {
   const [submitting, setSubmitting] = useState(false);
   const [showSubmittedModal, setShowSubmittedModal] = useState(false);
 
-  const getAuthHeaders = () => {
+  const getAuthHeaders = (): Record<string, string> => {
     const token = typeof window !== 'undefined'
       ? (sessionStorage.getItem('accessToken') || localStorage.getItem('accessToken'))
       : null;
