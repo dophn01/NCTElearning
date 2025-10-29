@@ -1,0 +1,63 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
+import { Lesson } from '../../lessons/entities/lesson.entity';
+import { QuizQuestion } from './quiz-question.entity';
+import { QuizAttempt } from './quiz-attempt.entity';
+
+@Entity('quizzes')
+export class Quiz {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
+  lessonId: string;
+
+  @Column()
+  title: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string;
+
+  @Column({ nullable: true })
+  timeLimitMinutes: number;
+
+  @Column({ default: 3 })
+  maxAttempts: number;
+
+  @Column({ default: false })
+  isPublished: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  // Relations
+  @ManyToOne(() => Lesson, (lesson) => lesson.quizzes)
+  @JoinColumn({ name: 'lessonId' })
+  lesson: Lesson;
+
+  @OneToMany(() => QuizQuestion, (question) => question.quiz)
+  questions: QuizQuestion[];
+
+  @OneToMany(() => QuizAttempt, (attempt) => attempt.quiz)
+  attempts: QuizAttempt[];
+
+  // Helper methods
+  get totalPoints(): number {
+    return this.questions?.reduce((sum, question) => sum + question.points, 0) || 0;
+  }
+
+  get questionCount(): number {
+    return this.questions?.length || 0;
+  }
+}
