@@ -42,20 +42,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Configure axios defaults and migrate any existing localStorage token to sessionStorage
+  // Configure axios defaults and migrate any existing token in sessionStorage to localStorage
   useEffect(() => {
-    const localToken = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    const sessionToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
-    const token = sessionToken || localToken;
+    // Only use localStorage for persistence
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      // If token was in localStorage from an older version, move it to sessionStorage
-      if (!sessionToken) {
-        try {
-          sessionStorage.setItem('accessToken', token);
-          localStorage.removeItem('accessToken');
-        } catch {}
-      }
     }
   }, []);
 
@@ -65,14 +57,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
       });
-
       const { accessToken, user: userData } = response.data;
-      
-      sessionStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('accessToken', accessToken); // Use only localStorage
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       setUser(userData);
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (error: any) {
+      if (error.response) {
+        console.error('Login error: ', error.response.data);
+      } else {
+        console.error('Login error:', error.message);
+      }
       throw error;
     }
   };
@@ -80,27 +74,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (userData: RegisterData) => {
     try {
       const response = await axios.post<AuthResponse>('http://localhost:3001/api/auth/register', userData);
-      
       const { accessToken, user: newUser } = response.data;
-      
-      sessionStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('accessToken', accessToken); // Use only localStorage
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       setUser(newUser);
-    } catch (error) {
-      console.error('Register error:', error);
+    } catch (error: any) {
+      if (error.response) {
+        console.error('Register error: ', error.response.data);
+      } else {
+        console.error('Register error:', error.message);
+      }
       throw error;
     }
   };
 
   const logout = () => {
-    sessionStorage.removeItem('accessToken');
+    localStorage.removeItem('accessToken'); // Remove from localStorage only
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   const checkAuth = async () => {
     try {
-      const token = sessionStorage.getItem('accessToken');
+      const token = localStorage.getItem('accessToken'); // Only check localStorage
       if (!token) {
         setLoading(false);
         return;

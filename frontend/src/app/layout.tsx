@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NC Telearning - Nền tảng học văn học trực tuyến",
+  title: "NCTElearning - Nền tảng học văn học trực tuyến",
   description: "Nền tảng học văn học trực tuyến cho học sinh lớp 10, 11, 12 với video bài giảng, bài tập trắc nghiệm và bài tập viết luận",
   keywords: "văn học, học trực tuyến, lớp 10, lớp 11, lớp 12, giáo dục, Việt Nam",
   authors: [{ name: "NC Telearning Team" }],
@@ -25,6 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className="vietnamese-text">
+      <head>
+        <link rel="icon" type="image/svg+xml" href="/NCTlearning-01.svg" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased bg-nc-cream`}>
         <AuthProvider>
           <div className="min-h-screen flex flex-col">

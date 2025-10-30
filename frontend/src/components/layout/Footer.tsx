@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpenIcon, EnvelopeIcon, PhoneIcon } from '@heroicons/react/24/outline';
+import { BookOpenIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
 
 export function Footer() {
   return (
@@ -83,9 +83,18 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="border-t border-nc-orange mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-200 text-sm">
-              Coppyright © 2025 By Nguyen Cuong.
-            </p>
+            <div>
+              <div className="flex flex-col items-start md:items-start mb-2 md:mb-0">
+                <span className="text-gray-100 font-bold text-base mb-0.5">Trường THPT Chuyên Nguyễn Chí Thanh</span>
+                <div className="flex items-center space-x-2 text-gray-200 text-sm font-semibold">
+                  <MapPinIcon className="h-5 w-5 text-nc-gold" />
+                  <span>08 Lê Duẩn, Phường Nam Gia Nghĩa, Lâm Đồng</span>
+                </div>
+              </div>
+              <p className="text-gray-200 text-sm">
+                Coppyright © 2025 By Nguyen Cuong.
+              </p>
+            </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <Link href="/facebook" className="text-gray-200 hover:text-nc-gold transition-colors">  
                 Facebook

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 type QuestionInput = {
   questionText: string;
@@ -17,6 +18,9 @@ type Lesson = {
 
 export default function NewExercisePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const chosenType = searchParams?.get('type') as 'doc_hieu' | 'viet' | null;
+
   const [title, setTitle] = useState('');
   const [prompt, setPrompt] = useState('');
   const [timeLimitMinutes, setTimeLimitMinutes] = useState<number | ''>('');
@@ -25,9 +29,24 @@ export default function NewExercisePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+  const [practiceType, setPracticeType] = useState<'doc_hieu' | 'viet' | ''>('');
+  const [topic, setTopic] = useState<string>('');
+  const [description, setDescription] = useState('');
+
+  const docHieuTopics = [
+    { value: 'tho', label: 'Thơ' },
+    { value: 'truyen', label: 'Truyện' },
+    { value: 'ki', label: 'Kí' },
+    { value: 'nghi_luan', label: 'Văn bản nghị luận' },
+    { value: 'thong_tin', label: 'Văn bản thông tin' },
+  ];
+  const vietTopics = [
+    { value: 'nghi_luan_xa_hoi', label: 'Nghị luận xã hội' },
+    { value: 'nghi_luan_van_hoc', label: 'Nghị luận văn học' },
+  ];
 
   const getAuthHeaders = (): Record<string, string> => {
-    const token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
@@ -62,6 +81,8 @@ export default function NewExercisePage() {
       setError('Vui lòng chọn lớp');
       return;
     }
+    if (!practiceType) { setError('Vui lòng chọn loại luyện tập'); return; }
+    if (!topic) { setError('Vui lòng chọn chủ đề'); return; }
     setError(null);
     setSubmitting(true);
     try {
@@ -76,6 +97,8 @@ export default function NewExercisePage() {
           timeLimitMinutes: typeof timeLimitMinutes === 'number' ? timeLimitMinutes : undefined,
           isPublished: true,
           gradeLevel,
+          practiceType,
+          topic,
         }),
       });
       if (!quizRes.ok) {
@@ -137,10 +160,89 @@ export default function NewExercisePage() {
     }
   };
 
+  // New: render based on chosenType
+  if (!chosenType) {
+    // Show a friendly message
+    return <div className="bg-nc-cream min-h-screen py-12 flex items-center justify-center text-xl text-nc-dark-orange">Vui lòng chọn loại bài tập từ trang quản lý.</div>;
+  }
+
+  // If 'viet', render essay/viết box
+  if (chosenType === 'viet') {
+    return (
+      <div className="bg-nc-cream min-h-screen py-8">
+        <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold text-nc-dark-orange mb-7">Tạo Bài Tập Viết (Nghị luận)</h1>
+          <div className="card space-y-6">
+            <div>
+              <label className="label">Lớp</label>
+              <select className="input" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value as any)}>
+                <option value="">Chọn lớp</option>
+                <option value="10">Lớp 10</option>
+                <option value="11">Lớp 11</option>
+                <option value="12">Lớp 12</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Chủ đề</label>
+              <select className="input" value={topic} onChange={(e) => setTopic(e.target.value)}>
+                <option value="">Chọn chủ đề</option>
+                {vietTopics.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="label">Mô tả bài tập (mục đích, hướng dẫn, v.v.)</label>
+              <textarea className="input min-h-[80px]" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Nhập mô tả cho bài tập (không bắt buộc)" />
+            </div>
+            <div>
+              <label className="label">Đề bài</label>
+              <textarea className="input min-h-[120px]" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Nhập đề bài" />
+            </div>
+            <div>
+              <label className="label">Giới hạn thời gian (phút, tuỳ chọn)</label>
+              <input className="input" type="number" min={0} value={timeLimitMinutes} onChange={(e) => setTimeLimitMinutes(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ví dụ: 60" />
+            </div>
+            {error && <div className="text-red-600 text-sm">{error}</div>}
+            <div className="flex justify-end">
+              <button disabled={submitting} className="btn-primary" onClick={async () => {
+                if (!gradeLevel) { setError('Vui lòng chọn lớp'); return; }
+                if (!topic) { setError('Vui lòng chọn chủ đề'); return; }
+                if (!prompt) { setError('Vui lòng nhập đề bài'); return; }
+                setSubmitting(true); setError(null);
+                try {
+                  const res = await fetch('http://localhost:3001/api/essay-exercises', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      title: prompt.slice(0, 32) + (prompt.length > 32 ? '...' : ''),
+                      prompt,
+                      description,
+                      timeLimitMinutes: typeof timeLimitMinutes === 'number' ? timeLimitMinutes : undefined,
+                      isPublished: true,
+                      gradeLevel,
+                      practiceType: 'viet',
+                      topic,
+                    }),
+                  });
+                  if (!res.ok) throw new Error(await res.text());
+                  router.push('/admin/practice');
+                } catch (e) { setError(e instanceof Error ? e.message : 'Không thể tạo bài tập.'); } finally { setSubmitting(false); }
+              }}>
+                {submitting ? 'Đang tạo...' : 'Tạo bài tập Viết'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // If 'doc_hieu', render original quiz flow as before
   return (
     <div className="bg-nc-cream min-h-screen py-8">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-nc-dark-orange mb-6">Tạo Bài Tập Trắc Nghiệm</h1>
+        <h1 className="text-3xl font-bold text-nc-dark-orange mb-6">TẠO BÀI TẬP ĐỌC HIỂU</h1>
 
         <div className="card space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -171,7 +273,37 @@ export default function NewExercisePage() {
               <option value="12">Lớp 12</option>
             </select>
           </div>
+          <div>
+            <label className="label">Loại luyện tập</label>
+            <select
+              className="input"
+              value={practiceType}
+              onChange={(e) => {
+                setPracticeType(e.target.value as 'doc_hieu' | 'viet');
+                setTopic(''); // reset topic
+              }}
+            >
+              <option value="">Chọn loại luyện tập</option>
+              <option value="doc_hieu">Đọc hiểu</option>
+              <option value="viet">Viết</option>
+            </select>
+          </div>
         </div>
+        {practiceType !== '' && (
+          <div>
+            <label className="label">Chủ đề</label>
+            <select
+              className="input"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+            >
+              <option value="">Chọn chủ đề</option>
+              {(practiceType === 'doc_hieu' ? docHieuTopics : vietTopics).map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
 
           <div>
             <label className="label">Đề bài</label>

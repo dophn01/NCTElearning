@@ -17,8 +17,8 @@ export class EssayExercise {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
-  lessonId: string;
+  @Column({ nullable: true })
+  lessonId: string | null;
 
   @Column({ name: 'grade_level', type: 'varchar', length: 10, nullable: true })
   gradeLevel: GradeLevel | null;
@@ -41,6 +41,19 @@ export class EssayExercise {
   @Column({ default: false })
   isPublished: boolean;
 
+  @Column({ name: 'practice_type', type: 'varchar', length: 10 })
+  practiceType: 'doc_hieu' | 'viet';
+
+  @Column({ name: 'topic', type: 'varchar', length: 32 })
+  topic:
+    | 'tho' // Thơ
+    | 'truyen' // Truyện
+    | 'ki' // Kí
+    | 'nghi_luan' // Văn bản nghị luận
+    | 'thong_tin' // Văn bản thông tin
+    | 'nghi_luan_xa_hoi' // Nghị luận xã hội
+    | 'nghi_luan_van_hoc';
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -48,9 +61,9 @@ export class EssayExercise {
   updatedAt: Date;
 
   // Relations
-  @ManyToOne(() => Lesson, (lesson) => lesson.essayExercises)
+  @ManyToOne(() => Lesson, (lesson) => lesson.essayExercises, { nullable: true })
   @JoinColumn({ name: 'lessonId' })
-  lesson: Lesson;
+  lesson: Lesson | null;
 
   @OneToMany(() => EssaySubmission, (submission) => submission.exercise)
   submissions: EssaySubmission[];

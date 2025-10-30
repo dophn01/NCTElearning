@@ -34,18 +34,21 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
+    console.log(`[LOGIN_ATTEMPT] email: ${loginDto.email}`);
     const user = await this.usersService.findByEmail(loginDto.email);
     if (!user || !user.isActive) {
+      console.log(`[LOGIN_FAIL] email: ${loginDto.email} (user not found or inactive)`);
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
+      console.log(`[LOGIN_FAIL] email: ${loginDto.email} (bad password)`);
       throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
     }
 
     const accessToken = this.generateAccessToken(user);
-    
+    console.log(`[LOGIN_SUCCESS] email: ${user.email}`);
     return {
       accessToken,
       user: this.sanitizeUser(user),

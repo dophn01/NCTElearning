@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { AcademicCapIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 type Quiz = {
   id: string;
@@ -17,6 +19,8 @@ export default function AdminPracticePage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [grade, setGrade] = useState<'all' | '10' | '11' | '12'>('all');
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [showModal, setShowModal] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -59,7 +63,7 @@ export default function AdminPracticePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-nc-dark-orange">Quản lý Bài Tập</h1>
-          <Link href="/admin/practice/exercises/new" className="btn-primary">+ Thêm bài tập</Link>
+          <button className="btn-primary" onClick={() => setShowModal(true)}>+ Thêm bài tập</button>
         </div>
 
         <div className="flex items-center gap-3 mb-4">
@@ -96,6 +100,30 @@ export default function AdminPracticePage() {
           )}
         </div>
       </div>
+
+      {/* Modal overlay for type selection */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-lg">
+            <h2 className="text-xl font-bold text-nc-dark-orange mb-6 text-center">Chọn loại bài tập</h2>
+            <div className="flex flex-col gap-6 items-center">
+              <button
+                className="w-full border-2 border-nc-gold px-5 py-4 rounded-lg flex items-center gap-4 text-xl font-semibold hover:bg-nc-gold/10 transition mb-2"
+                onClick={() => { setShowModal(false); router.push('/admin/practice/exercises/new?type=doc_hieu'); }}
+              >
+                <AcademicCapIcon className="h-8 w-8 text-nc-gold" /> Đọc hiểu
+              </button>
+              <button
+                className="w-full border-2 border-nc-orange px-5 py-4 rounded-lg flex items-center gap-4 text-xl font-semibold hover:bg-nc-orange/10 transition"
+                onClick={() => { setShowModal(false); router.push('/admin/practice/exercises/new?type=viet'); }}
+              >
+                <PencilIcon className="h-8 w-8 text-nc-orange" /> Viết
+              </button>
+              <button className="mt-4 text-sm text-gray-500 hover:text-nc-dark-orange underline" onClick={() => setShowModal(false)}>Huỷ</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

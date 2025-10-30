@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Request } from '@nestjs/common';
 import { EssayExercisesService, CreateEssayExerciseDto, CreateEssaySubmissionDto } from './essay-exercises.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -17,19 +17,23 @@ export class EssayExercisesController {
 
   @Post('submissions')
   @UseGuards(JwtAuthGuard)
-  createSubmission(@Body() createSubmissionDto: CreateEssaySubmissionDto) {
-    return this.essayExercisesService.createSubmission(createSubmissionDto);
+  createSubmission(@Body() createSubmissionDto: CreateEssaySubmissionDto, @Request() req: any) {
+    // Attach userId from authenticated user
+    const userId = req.user?.id;
+    return this.essayExercisesService.createSubmission({ ...createSubmissionDto, userId });
   }
 
   @Get()
   findAll(
     @Query('lessonId') lessonId?: string,
-    @Query('gradeLevel') gradeLevel?: '10' | '11' | '12'
+    @Query('gradeLevel') gradeLevel?: '10' | '11' | '12',
+    @Query('practiceType') practiceType?: 'doc_hieu' | 'viet',
+    @Query('topic') topic?: string
   ) {
     if (lessonId) {
       return this.essayExercisesService.findByLesson(lessonId);
     }
-    return this.essayExercisesService.findAllExercises(gradeLevel);
+    return this.essayExercisesService.findAllExercises(gradeLevel, practiceType, topic);
   }
 
   @Get('submissions')

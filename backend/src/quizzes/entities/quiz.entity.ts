@@ -50,10 +50,10 @@ export class Quiz {
   @JoinColumn({ name: 'lessonId' })
   lesson: Lesson;
 
-  @OneToMany(() => QuizQuestion, (question) => question.quiz)
+  @OneToMany(() => QuizQuestion, (question) => question.quiz, { cascade: true, onDelete: 'CASCADE' })
   questions: QuizQuestion[];
 
-  @OneToMany(() => QuizAttempt, (attempt) => attempt.quiz)
+  @OneToMany(() => QuizAttempt, (attempt) => attempt.quiz, { cascade: true, onDelete: 'CASCADE' })
   attempts: QuizAttempt[];
 
   // Helper methods

@@ -90,7 +90,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-nc-dark-orange mb-4">
-              Tại sao chọn NCTelearning?
+              Tại sao chọn NCTElearning?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Chúng tôi mang đến phương pháp học văn học hiện đại, 
@@ -123,7 +123,7 @@ export default function Home() {
             Sẵn sàng bắt đầu hành trình học văn học?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Tham gia cùng hàng nghìn học sinh đã tin tưởng và lựa chọn NC Telearning
+            Tham gia cùng hàng nghìn học sinh đã tin tưởng và lựa chọn NCTElearning
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link

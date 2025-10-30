@@ -14,6 +14,15 @@ export interface CreateEssayExerciseDto {
   timeLimitMinutes?: number;
   isPublished?: boolean;
   gradeLevel?: GradeLevel;
+  practiceType: 'doc_hieu' | 'viet';
+  topic:
+    | 'tho'
+    | 'truyen'
+    | 'ki'
+    | 'nghi_luan'
+    | 'thong_tin'
+    | 'nghi_luan_xa_hoi'
+    | 'nghi_luan_van_hoc';
 }
 
 export interface CreateEssaySubmissionDto {
@@ -43,7 +52,11 @@ export class EssayExercisesService {
     return this.submissionsRepository.save(submission);
   }
 
-  async findAllExercises(gradeLevel?: '10' | '11' | '12'): Promise<EssayExercise[]> {
+  async findAllExercises(
+    gradeLevel?: '10' | '11' | '12',
+    practiceType?: 'doc_hieu' | 'viet',
+    topic?: string
+  ): Promise<EssayExercise[]> {
     const qb = this.exercisesRepository.createQueryBuilder('exercise')
       .leftJoinAndSelect('exercise.lesson', 'lesson')
       .leftJoinAndSelect('lesson.course', 'course')
@@ -51,6 +64,14 @@ export class EssayExercisesService {
 
     if (gradeLevel) {
       qb.andWhere('(exercise.gradeLevel = :gradeLevel OR course.gradeLevel = :gradeLevel)', { gradeLevel });
+    }
+
+    if (practiceType) {
+      qb.andWhere('exercise.practiceType = :practiceType', { practiceType });
+    }
+
+    if (topic) {
+      qb.andWhere('exercise.topic = :topic', { topic });
     }
 
     return qb.getMany();

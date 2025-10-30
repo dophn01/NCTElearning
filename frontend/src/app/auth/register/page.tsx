@@ -123,39 +123,21 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                Vai trò
+              <label htmlFor="gradeLevel" className="block text-sm font-medium text-gray-700">
+                Lớp
               </label>
               <select
-                id="role"
-                name="role"
-                value={formData.role}
+                id="gradeLevel"
+                name="gradeLevel"
+                value={formData.gradeLevel}
                 onChange={handleChange}
                 className="input mt-1"
               >
-                <option value="user">Học sinh</option>
-                <option value="admin">Giáo viên</option>
+                <option value="10">Lớp 10</option>
+                <option value="11">Lớp 11</option>
+                <option value="12">Lớp 12</option>
               </select>
             </div>
-
-            {formData.role === 'user' && (
-              <div>
-                <label htmlFor="gradeLevel" className="block text-sm font-medium text-gray-700">
-                  Lớp
-                </label>
-                <select
-                  id="gradeLevel"
-                  name="gradeLevel"
-                  value={formData.gradeLevel}
-                  onChange={handleChange}
-                  className="input mt-1"
-                >
-                  <option value="10">Lớp 10</option>
-                  <option value="11">Lớp 11</option>
-                  <option value="12">Lớp 12</option>
-                </select>
-              </div>
-            )}
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
