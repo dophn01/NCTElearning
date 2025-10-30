@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BookOpenIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export function Footer() {
   return (
@@ -9,7 +10,7 @@ export function Footer() {
           {/* Logo and Description */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <BookOpenIcon className="h-8 w-8 text-nc-gold" />
+              <Image src="NCTlearning-02.svg" alt="NCTlearning" width={50} height={50} />
               <span className="text-xl font-bold">NCTElearning</span>
             </div>
             <p className="text-gray-200 mb-4 max-w-md">

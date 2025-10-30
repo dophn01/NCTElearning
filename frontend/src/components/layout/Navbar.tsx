@@ -4,7 +4,6 @@ import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { 
-  BookOpenIcon, 
   VideoCameraIcon, 
   AcademicCapIcon,
   Bars3Icon,
@@ -13,6 +12,7 @@ import {
   ArrowRightOnRectangleIcon,
   CogIcon
 } from '@heroicons/react/24/outline';
+import Image from 'next/image'; 
 
 export function Navbar() {
   const { user, logout, isAuthenticated } = useAuth();
@@ -44,14 +44,18 @@ export function Navbar() {
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
+        <div className="flex justify-between items-center h-30 md:h-40 lg:h-40">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center space-x-2">
-              <BookOpenIcon className="h-8 w-8 text-nc-gold" />
-              <span className="text-xl font-bold text-nc-dark-orange">
-                NC Telearning
-              </span>
+              <Image
+                src="/NCTlearning-01.svg"
+                alt="NCTlearning"
+                width={200}
+                height={160}
+                priority
+                
+              />
             </Link>
           </div>
 
