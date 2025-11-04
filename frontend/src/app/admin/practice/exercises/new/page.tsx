@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
+import { apiUrl } from '@/lib/api';
 
 type QuestionInput = {
   questionText: string;
@@ -87,7 +88,7 @@ export default function NewExercisePage() {
     setSubmitting(true);
     try {
       // Create quiz (use description as prompt)
-      const quizRes = await fetch('http://localhost:3001/api/quizzes', {
+      const quizRes = await fetch(apiUrl('/api/quizzes'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         credentials: 'include',
@@ -110,7 +111,7 @@ export default function NewExercisePage() {
       // Create questions and options sequentially to preserve orderIndex
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
-        const questionRes = await fetch('http://localhost:3001/api/quizzes/questions', {
+        const questionRes = await fetch(apiUrl('/api/quizzes/questions'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           credentials: 'include',
@@ -133,7 +134,7 @@ export default function NewExercisePage() {
         for (let j = 0; j < orderMap.length; j++) {
           const key = orderMap[j];
           const opt = q.options.find((o) => o.key === key)!;
-          const optRes = await fetch('http://localhost:3001/api/quizzes/options', {
+          const optRes = await fetch(apiUrl('/api/quizzes/options'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
             credentials: 'include',
@@ -211,7 +212,7 @@ export default function NewExercisePage() {
                 if (!prompt) { setError('Vui lòng nhập đề bài'); return; }
                 setSubmitting(true); setError(null);
                 try {
-                  const res = await fetch('http://localhost:3001/api/essay-exercises', {
+                  const res = await fetch(apiUrl('/api/essay-exercises'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                     credentials: 'include',

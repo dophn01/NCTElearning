@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
+import { apiUrl } from '@/lib/api';
 
 const DOC_HIEU_TOPICS = [
   { value: "tho", label: "Thơ", icon: <PuzzlePieceIcon className="w-7 h-7 text-nc-gold" /> },
@@ -30,7 +31,7 @@ export default function DocHieuSelectionPage() {
   const [exercises, setExercises] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/essay-exercises?practiceType=doc_hieu")
+    fetch(apiUrl('/api/essay-exercises?practiceType=doc_hieu'))
       .then(res => res.json())
       .then(setExercises)
       .catch(() => setExercises([]));

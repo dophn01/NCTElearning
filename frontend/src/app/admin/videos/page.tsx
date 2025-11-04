@@ -12,6 +12,7 @@ import {
   ClockIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import { apiUrl } from '@/lib/api';
 
 interface Video {
   id: string;
@@ -69,7 +70,7 @@ export default function AdminVideosPage() {
 
   const fetchVideos = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/videos', {
+      const response = await fetch(apiUrl('/api/videos'), {
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
         }
@@ -100,7 +101,7 @@ export default function AdminVideosPage() {
     if (!confirm('Bạn có chắc chắn muốn xóa video này?')) return;
 
     try {
-      const response = await fetch(`http://localhost:3001/api/videos/${videoId}`, {
+      const response = await fetch(apiUrl(`/api/videos/${videoId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`
@@ -343,7 +344,7 @@ function VideoUploadModal({ onClose, onUploadSuccess }: VideoUploadModalProps) {
         file: formData.file?.name
       });
 
-      const response = await fetch('http://localhost:3001/api/videos', {
+      const response = await fetch(apiUrl('/api/videos'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${sessionStorage.getItem('accessToken')}`

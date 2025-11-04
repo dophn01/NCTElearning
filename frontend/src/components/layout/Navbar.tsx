@@ -36,7 +36,7 @@ export function Navbar() {
   };
 
   const navigation = [
-    { name: 'Trang chủ', href: '/' },
+    { name: 'Giới thiệu', href: '/about'},
     { name: 'Video bài giảng', href: '/videos' },
     { name: 'Luyện tập', href: '/practice' },
   ];
@@ -44,17 +44,16 @@ export function Navbar() {
   return (
     <nav className="bg-white shadow-lg border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-30 md:h-40 lg:h-40">
+        <div className="flex justify-between items-center h-20 md:h-32 lg:h-25">
           {/* Logo */}
           <div className="flex items-center shrink-0">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/NCTlearning-01.svg"
+                src="/logo.svg"
                 alt="NCTlearning"
-                width={200}
+                width={236}
                 height={160}
                 priority
-                
               />
             </Link>
           </div>
@@ -138,15 +137,15 @@ export function Navbar() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/auth/login"
-                  className="text-gray-700 hover:text-nc-gold px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                  className="btn-primary flex flex-row space-x-2"
                 >
-                  Đăng nhập
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="btn-primary text-sm"
-                >
-                  Đăng ký
+                  <p>Đăng ký ngay</p>
+                  <Image 
+                    src="/Component1.svg"
+                    alt="component1"
+                    width={12}
+                    height={17}
+                  />
                 </Link>
               </div>
             )}
@@ -203,7 +202,7 @@ export function Navbar() {
                         <CogIcon className="h-5 w-5" />
                         <span>Quản lý Luyện tập</span>
                       </Link>
-                    </div>
+                    </div>  
                   )}
                   
                   <div className="flex items-center space-x-2 px-3 py-2">
@@ -236,17 +235,10 @@ export function Navbar() {
                 <div className="pt-4 border-t border-gray-200 space-y-2">
                   <Link
                     href="/auth/login"
-                    className="text-gray-700 hover:text-nc-gold block px-3 py-2 rounded-md text-base font-medium transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Đăng nhập
-                  </Link>
-                  <Link
-                    href="/auth/register"
                     className="btn-primary block text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    Đăng ký
+                    Đăng ký ngay
                   </Link>
                 </div>
               )}

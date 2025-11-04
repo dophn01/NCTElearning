@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import axios from 'axios';
+import { apiUrl } from '@/lib/api';
 
 interface User {
   id: string;
@@ -53,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await axios.post<AuthResponse>('http://localhost:3001/api/auth/login', {
+      const response = await axios.post<AuthResponse>(apiUrl('/api/auth/login'), {
         email,
         password,
       });
@@ -73,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await axios.post<AuthResponse>('http://localhost:3001/api/auth/register', userData);
+      const response = await axios.post<AuthResponse>(apiUrl('/api/auth/register'), userData);
       const { accessToken, user: newUser } = response.data;
       localStorage.setItem('accessToken', accessToken); // Use only localStorage
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -103,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      const response = await axios.get<User>('http://localhost:3001/api/auth/profile');
+      const response = await axios.get<User>(apiUrl('/api/auth/profile'));
       setUser(response.data);
     } catch (error) {
       console.error('Auth check error:', error);

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
 import { AcademicCapIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { apiUrl, withAuthHeaders } from '@/lib/api';
 
 type Quiz = {
   id: string;
@@ -26,9 +27,9 @@ export default function AdminPracticePage() {
     setLoading(true);
     try {
       const url = grade === 'all'
-        ? 'http://localhost:3001/api/quizzes'
-        : `http://localhost:3001/api/quizzes?gradeLevel=${grade}`;
-      const res = await fetch(url, { credentials: 'include' });
+        ? apiUrl('/api/quizzes')
+        : apiUrl(`/api/quizzes?gradeLevel=${grade}`);
+      const res = await fetch(url, { headers: withAuthHeaders(), credentials: 'include' });
       const data = await res.json();
       setQuizzes(data);
     } finally {
@@ -38,10 +39,10 @@ export default function AdminPracticePage() {
 
   const removeQuiz = async (id: string) => {
     if (!confirm('Bạn có chắc muốn xóa bài tập này? Hành động không thể hoàn tác.')) return;
-    await fetch(`http://localhost:3001/api/quizzes/${id}`, {
+    await fetch(apiUrl(`/api/quizzes/${id}`), {
       method: 'DELETE',
       credentials: 'include',
-      headers: { ...(typeof window !== 'undefined' && sessionStorage.getItem('accessToken') ? { Authorization: `Bearer ${sessionStorage.getItem('accessToken')}` } : {}) },
+      headers: withAuthHeaders(),
     });
     setQuizzes((prev) => prev.filter((q) => q.id !== id));
   };

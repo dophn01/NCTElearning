@@ -9,6 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/components/providers/AuthProvider";
 import { useEffect } from "react";
+import { apiUrl } from '@/lib/api';
 
 const VIET_TOPICS = [
   { value: "nghi_luan_xa_hoi", label: "Nghị luận xã hội", icon: <LightBulbIcon className="w-7 h-7 text-nc-orange" /> },
@@ -23,7 +24,7 @@ export default function VietSelectionPage() {
   const [essays, setEssays] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:3001/api/essay-exercises?practiceType=viet")
+    fetch(apiUrl('/api/essay-exercises?practiceType=viet'))
       .then(res => res.json())
       .then(setEssays)
       .catch(() => setEssays([]));

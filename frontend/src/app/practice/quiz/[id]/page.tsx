@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
+import { apiUrl } from '@/lib/api';
 
 type Option = { id: string; optionText: string; orderIndex: number };
 type Question = { id: string; questionText: string; orderIndex: number; points: number; options: Option[] };
@@ -38,11 +39,11 @@ export default function QuizTakePage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`http://localhost:3001/api/quizzes/${quizId}`);
+        const res = await fetch(apiUrl(`/api/quizzes/${quizId}`));
         const data = await res.json();
         setQuiz(data);
         // Start attempt (requires auth cookie)
-        const startRes = await fetch(`http://localhost:3001/api/quizzes/${quizId}/start`, {
+        const startRes = await fetch(apiUrl(`/api/quizzes/${quizId}/start`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           // JWT via Authorization header
@@ -67,7 +68,7 @@ export default function QuizTakePage() {
     setAnswers((prev) => ({ ...prev, [questionId]: selectedOptionId }));
     if (!attemptId) return;
     try {
-      const ansRes = await fetch(`http://localhost:3001/api/quizzes/attempts/${attemptId}/answers`, {
+      const ansRes = await fetch(apiUrl(`/api/quizzes/attempts/${attemptId}/answers`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ questionId, selectedOptionId }),
@@ -87,7 +88,7 @@ export default function QuizTakePage() {
       let currentAttemptId = attemptId;
       if (!currentAttemptId) {
         // Try to start an attempt if one wasn't started successfully on load
-        const startRes = await fetch(`http://localhost:3001/api/quizzes/${quizId}/start`, {
+        const startRes = await fetch(apiUrl(`/api/quizzes/${quizId}/start`), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           body: JSON.stringify({ userId: user?.id || '' }),
@@ -106,7 +107,7 @@ export default function QuizTakePage() {
         setAttemptId(started.id);
       }
 
-      const completeRes = await fetch(`http://localhost:3001/api/quizzes/attempts/${currentAttemptId}/complete`, {
+      const completeRes = await fetch(apiUrl(`/api/quizzes/attempts/${currentAttemptId}/complete`), {
         method: 'POST',
         headers: { ...getAuthHeaders() },
       });

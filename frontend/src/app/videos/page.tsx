@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { useRouter } from 'next/navigation';
+import { apiUrl } from '@/lib/api';
 import { 
   PlayIcon, 
   ClockIcon, 
@@ -63,7 +64,7 @@ export default function VideosPage() {
         throw new Error('Không có token xác thực');
       }
 
-      const response = await fetch('http://localhost:3001/api/videos', {
+      const response = await fetch(apiUrl('/api/videos'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

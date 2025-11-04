@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { apiUrl } from '@/lib/api';
 
 type Attempt = {
   id: string;
@@ -36,8 +37,8 @@ export default function ManageExercisePage() {
     setLoading(true);
     try {
       const [pRes, cRes] = await Promise.all([
-        fetch(`http://localhost:3001/api/quizzes/${quizId}/attempts?status=in_progress`, { credentials: 'include' }),
-        fetch(`http://localhost:3001/api/quizzes/${quizId}/attempts?status=completed`, { credentials: 'include' }),
+        fetch(apiUrl(`/api/quizzes/${quizId}/attempts?status=in_progress`), { credentials: 'include' }),
+        fetch(apiUrl(`/api/quizzes/${quizId}/attempts?status=completed`), { credentials: 'include' }),
       ]);
       setInProgress(await pRes.json());
       setCompleted(await cRes.json());
@@ -51,13 +52,13 @@ export default function ManageExercisePage() {
   }, [quizId]);
 
   const openAttempt = async (attemptId: string) => {
-    const res = await fetch(`http://localhost:3001/api/quizzes/attempts/${attemptId}`, { credentials: 'include' });
+    const res = await fetch(apiUrl(`/api/quizzes/attempts/${attemptId}`), { credentials: 'include' });
     const data = await res.json();
     setSelectedAttempt(data);
   };
 
   const gradeAnswer = async (answerId: string, pointsEarned: number, isCorrect: boolean) => {
-    await fetch(`http://localhost:3001/api/quizzes/attempts/answers/${answerId}`, {
+    await fetch(apiUrl(`/api/quizzes/attempts/answers/${answerId}`), {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

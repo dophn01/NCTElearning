@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { apiUrl } from '@/lib/api';
 
 // Utility for formatting mm:ss
 function formatTime(seconds: number) {
@@ -28,7 +29,7 @@ export default function VietExercisePage() {
     async function fetchExercise() {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3001/api/essay-exercises/${id}`);
+        const res = await fetch(apiUrl(`/api/essay-exercises/${id}`));
         if (!res.ok) throw new Error("Không tìm thấy bài tập");
         const data = await res.json();
         setExercise(data);
@@ -67,7 +68,7 @@ export default function VietExercisePage() {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:3001/api/essay-exercises/submissions", {
+      const res = await fetch(apiUrl('/api/essay-exercises/submissions'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

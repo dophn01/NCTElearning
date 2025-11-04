@@ -53,6 +53,7 @@ import { UserProgress } from '../user-progress/entities/user-progress.entity';
           username: configService.get('DATABASE_USER'),
           password: configService.get('DATABASE_PASSWORD'),
           database: configService.get('DATABASE_NAME'),
+          ssl: configService.get('DATABASE_SSL') === 'true' ? { rejectUnauthorized: false } : undefined,
           entities,
           synchronize: false, // Disabled to prevent schema conflicts
           logging: configService.get('NODE_ENV') === 'development',

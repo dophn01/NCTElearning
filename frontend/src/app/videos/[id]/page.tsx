@@ -11,6 +11,7 @@ import {
   ArrowLeftIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
+import { apiUrl } from '@/lib/api';
 
 interface Video {
   id: string;
@@ -70,7 +71,7 @@ export default function VideoDetailPage() {
         throw new Error('Không có token xác thực');
       }
 
-      const response = await fetch(`http://localhost:3001/api/videos/${videoId}`, {
+      const response = await fetch(apiUrl(`/api/videos/${videoId}`), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
