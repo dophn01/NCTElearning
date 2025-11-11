@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { apiUrl } from '@/lib/api';
 
+// Force dynamic rendering - this page uses dynamic route params
+export const dynamic = 'force-dynamic';
+
 type Attempt = {
   id: string;
   user: { id: string; firstName: string; lastName: string; email: string };

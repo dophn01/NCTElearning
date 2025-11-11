@@ -4,6 +4,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiUrl } from '@/lib/api';
 
+// Force dynamic rendering - this page uses dynamic route params
+export const dynamic = 'force-dynamic';
+
 // Utility for formatting mm:ss
 function formatTime(seconds: number) {
   const m = Math.floor(seconds / 60)

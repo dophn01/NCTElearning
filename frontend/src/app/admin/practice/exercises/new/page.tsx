@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { apiUrl } from '@/lib/api';
 
+// Force dynamic rendering - this page uses searchParams which requires dynamic rendering
+export const dynamic = 'force-dynamic';
+
 type QuestionInput = {
   questionText: string;
   points: number;

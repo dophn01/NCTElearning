@@ -5,6 +5,9 @@ import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/AuthProvider';
 import { apiUrl } from '@/lib/api';
 
+// Force dynamic rendering - this page uses dynamic route params
+export const dynamic = 'force-dynamic';
+
 type Option = { id: string; optionText: string; orderIndex: number };
 type Question = { id: string; questionText: string; orderIndex: number; points: number; options: Option[] };
 type Quiz = { id: string; title: string; description: string; timeLimitMinutes?: number; questions: Question[] };

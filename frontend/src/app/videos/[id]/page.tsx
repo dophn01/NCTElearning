@@ -13,6 +13,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiUrl } from '@/lib/api';
 
+// Force dynamic rendering - this page uses dynamic route params
+export const dynamic = 'force-dynamic';
+
 interface Video {
   id: string;
   title: string;
