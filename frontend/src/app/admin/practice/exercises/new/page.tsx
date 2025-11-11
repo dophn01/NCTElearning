@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
 import { apiUrl } from '@/lib/api';
@@ -20,7 +20,7 @@ type Lesson = {
   course: { id: string; title: string; gradeLevel: '10' | '11' | '12' };
 };
 
-export default function NewExercisePage() {
+function NewExercisePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const chosenType = searchParams?.get('type') as 'doc_hieu' | 'viet' | null;
@@ -432,4 +432,15 @@ export default function NewExercisePage() {
   );
 }
 
+export default function NewExercisePage() {
+  return (
+    <Suspense fallback={
+      <div className="bg-nc-cream min-h-screen py-12 flex items-center justify-center text-xl text-nc-dark-orange">
+        Đang tải...
+      </div>
+    }>
+      <NewExercisePageContent />
+    </Suspense>
+  );
+}
 
