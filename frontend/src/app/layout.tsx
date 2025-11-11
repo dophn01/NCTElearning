@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: "NCTElearning - Nền tảng học văn học trực tuyến",
   description: "Nền tảng học văn học trực tuyến cho học sinh lớp 10, 11, 12 với video bài giảng, bài tập trắc nghiệm và bài tập viết luận",
   keywords: "văn học, học trực tuyến, lớp 10, lớp 11, lớp 12, giáo dục, Việt Nam",
-  authors: [{ name: "NC Telearning Team" }],
+  authors: [{ name: "NCTelearning Team" }],
   viewport: "width=device-width, initial-scale=1",
 };
 

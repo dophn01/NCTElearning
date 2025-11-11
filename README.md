@@ -60,6 +60,19 @@ nc-telearning/
 - Backend API runs on: http://localhost:3001
 - pgAdmin4 runs on: http://localhost:5050
 
+## Deployment
+
+This project is configured for deployment to:
+- **Frontend**: Vercel
+- **Backend & Database**: Render
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+
+Quick start:
+1. Deploy backend and database to Render (see `render.yaml`)
+2. Deploy frontend to Vercel (see `frontend/vercel.json`)
+3. Update environment variables (see [ENV_VARIABLES.md](./ENV_VARIABLES.md))
+
 ## Contributing
 
 Please follow the established patterns for:
