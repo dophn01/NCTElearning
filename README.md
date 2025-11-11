@@ -62,16 +62,26 @@ nc-telearning/
 
 ## Deployment
 
-This project is configured for deployment to:
-- **Frontend**: Vercel
-- **Backend & Database**: Render
+This project is configured for deployment to **Render** (all services):
+- **Frontend**: Next.js on Render
+- **Backend**: NestJS API on Render
+- **Database**: PostgreSQL on Render
 
-See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
+### Quick Start
 
-Quick start:
-1. Deploy backend and database to Render (see `render.yaml`)
-2. Deploy frontend to Vercel (see `frontend/vercel.json`)
-3. Update environment variables (see [ENV_VARIABLES.md](./ENV_VARIABLES.md))
+**Option 1: Blueprint Deployment (Recommended)**
+1. Go to [render.com](https://render.com) → **New +** → **Blueprint**
+2. Connect your GitHub repository
+3. Render will detect `render.yaml` and create all services
+4. Follow [QUICK_DEPLOY_RENDER.md](./QUICK_DEPLOY_RENDER.md)
+
+**Option 2: Manual Deployment**
+- See [DEPLOYMENT_RENDER.md](./DEPLOYMENT_RENDER.md) for detailed step-by-step instructions
+
+### Documentation
+- [QUICK_DEPLOY_RENDER.md](./QUICK_DEPLOY_RENDER.md) - Fast deployment checklist
+- [DEPLOYMENT_RENDER.md](./DEPLOYMENT_RENDER.md) - Complete deployment guide
+- [ENV_VARIABLES.md](./ENV_VARIABLES.md) - Environment variables reference
 
 ## Contributing
 

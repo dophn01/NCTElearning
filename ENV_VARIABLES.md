@@ -2,21 +2,22 @@
 
 Quick reference for all environment variables needed for deployment.
 
-## Frontend (Vercel)
+## Frontend (Render)
 
 ### Required Variables
 
 | Variable | Description | Example |
 |----------|-------------|---------|
+| `NODE_ENV` | Environment mode | `production` |
+| `PORT` | Server port | `10000` (Render default) |
 | `NEXT_PUBLIC_API_BASE_URL` | Backend API URL | `https://nctelearning-backend.onrender.com` |
 
-### How to Set in Vercel
+### How to Set in Render
 
-1. Go to your project in Vercel dashboard
-2. Navigate to **Settings** → **Environment Variables**
-3. Add the variable with value
-4. Select environments (Production, Preview, Development)
-5. Click **Save**
+1. Go to your frontend service in Render dashboard
+2. Navigate to **Environment** tab
+3. Add each variable with its value
+4. Click **Save Changes** (triggers redeploy)
 
 ---
 
@@ -37,7 +38,7 @@ Quick reference for all environment variables needed for deployment.
 | `DATABASE_SSL` | Enable SSL | `true` |
 | `JWT_SECRET` | JWT signing secret | Generate strong random string |
 | `JWT_EXPIRES_IN` | JWT expiration | `24h` |
-| `CORS_ORIGIN` | Allowed origins | `https://your-app.vercel.app,http://localhost:3000` |
+| `CORS_ORIGIN` | Allowed origins | `https://nctelearning-frontend.onrender.com,http://localhost:3000` |
 | `MAX_FILE_SIZE` | Max upload size (bytes) | `104857600` (100MB) |
 | `UPLOAD_DEST` | Upload directory | `./uploads` |
 
@@ -65,6 +66,14 @@ You can reference these in your environment variables.
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001
+```
+
+### Frontend (Render)
+
+```env
+NODE_ENV=production
+PORT=10000
+NEXT_PUBLIC_API_BASE_URL=https://nctelearning-backend.onrender.com
 ```
 
 ### Backend (.env)
